@@ -322,7 +322,7 @@ function generateHtmlForCodeSearchEntry(data, url, searchTerm, statisticsObj) {
       jQuery.each(match.lineMatches, function (ix, fieldMatch) {
         statisticsObj.lines += 1;
         var fieldMatchHighlighted = fieldMatch.escaped.replace(
-          new RegExp(htmlEntities(searchTerm), 'gi'),
+          new RegExp(escapeSearchRegex(searchTerm), 'gi'),
           function (m) {
             return `<strong>${m}</strong>`;
           }
@@ -474,6 +474,19 @@ function setDefaultGroubBySysId(sys_id) {
 
 function setGroupDescription(group) {
   $('#search_group_description').text(group.description);
+}
+
+function escapeSearchRegex(search_term) {
+  search_term = htmlEntities(search_term);
+  if (RegExp.escape) {
+    // use browser-provided regex escape function, if available
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/escape
+    search_term = RegExp.escape(search_term);
+  } else {
+    // otherwise, manually escape special characters
+    search_term = search_term.replace(/(\\|\(|\)|\[\]|\.)/g, m => '\\'+m);
+  }
+  return search_term;
 }
 
 function htmlEntities(str) {
